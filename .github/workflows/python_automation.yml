@@ -4,8 +4,6 @@ on:
   workflow_dispatch: # Allows manual triggering of the workflow
   schedule:
     - cron: "30 4 * * *" # Runs every day at 10:00 AM IST
-    - cron: "30 8 * * *" # Runs every day at 2:00 PM IST
-    - cron: "30 13 * * *" # Runs every day at 7:00 PM IST
 
 jobs:
   automate-naukri-task:
@@ -20,57 +18,25 @@ jobs:
       with:
         python-version: "3.9"
 
-    - name: Install dependencies in naukri_env
+    - name: Install dependencies
       run: |
         python -m venv naukri_env
         source naukri_env/bin/activate
-        python -m pip install --upgrade pip
         pip install selenium
 
-    - name: Install Latest Google Chrome Version
+    - name: Install Chrome and ChromeDriver
       run: |
         sudo apt-get install -y software-properties-common
         wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
         sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
         sudo apt-get update
         sudo apt-get install -y google-chrome-stable
-
-    - name: Download Specific ChromeDriver Version
-      run: |
-        echo "Downloading ChromeDriver version 135.0.7049.42..."
         wget "https://storage.googleapis.com/chrome-for-testing-public/135.0.7049.42/linux64/chromedriver-linux64.zip"
-        if [ $? -ne 0 ]; then
-            echo "Failed to download ChromeDriver version 135.0.7049.42"
-            exit 1
-        fi
         unzip chromedriver-linux64.zip
         sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/chromedriver
 
-    - name: Verify Chrome and ChromeDriver Versions
-      run: |
-        echo "Verifying installed versions..."
-        if ! command -v google-chrome &> /dev/null
-        then
-            echo "Google Chrome is not installed or not in PATH"
-            exit 1
-        fi
-        echo "Google Chrome version:"
-        google-chrome --version
-
-        if ! command -v chromedriver &> /dev/null
-        then
-            echo "ChromeDriver is not installed or not in PATH"
-            exit 1
-        fi
-        echo "ChromeDriver version:"
-        chromedriver --version
-
-    - name: Install Virtual Display
-      run: |
-        sudo apt-get install -y xvfb
-
-    - name: Run Python Script with Virtual Display
+    - name: Run Python Script
       env:
         NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
         NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
@@ -79,5 +45,3 @@ jobs:
         source naukri_env/bin/activate &&
         python naukri_automation.py
         "
-        # Cleanup temporary files
-        sudo rm -rf /tmp/.X11-unix /tmp/.X*
