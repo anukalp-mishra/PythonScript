@@ -46,9 +46,20 @@ except Exception as e:
     print("Element attributes for debugging:")
     element = driver.find_element(By.ID, "usernameField")
 
+# Verify login success
+try:
+    WebDriverWait(driver, 10).until(EC.url_contains("dashboard"))
+    print("Logged in successfully! Current URL:", driver.current_url)
+except Exception as e:
+    print(f"Error verifying login: {e}")
+    print("Current URL:", driver.current_url)
+    driver.quit()
+    raise
+
 # Navigate to the Profile Page
 profile_url = "https://www.naukri.com/mnjuser/profile"
 driver.get(profile_url)
+print("Navigated to Profile Page. Current URL:", driver.current_url)
 
 # Wait for the profile page to load
 try:
@@ -84,7 +95,7 @@ if not os.path.exists(resume_path):
 # Find and upload resume
 try:
     upload_button = WebDriverWait(driver, 60).until(
-        EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']"))
+        EC.visibility_of_element_located((By.XPATH, "//*[@id='attachCV']"))
     )
     driver.execute_script("arguments[0].scrollIntoView();", upload_button)
     upload_button.send_keys(resume_path)
@@ -93,6 +104,10 @@ except Exception as e:
     print(f"Error uploading resume: {e}")
     print("Page source for debugging:")
     print(driver.page_source)
+    print("All input elements on the page:")
+    inputs = driver.find_elements(By.TAG_NAME, "input")
+    for input_element in inputs:
+        print(input_element.get_attribute("outerHTML"))
 
 # Close the browser
 driver.quit()
