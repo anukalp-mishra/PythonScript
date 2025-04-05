@@ -50,21 +50,26 @@ profile_url = "https://www.naukri.com/mnjuser/profile"
 driver.get(profile_url)
 
 # Wait for the profile page to load
-time.sleep(5)
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//input[@id='attachCV']")))
 
 print("Navigated to Profile Page!")
 
 # Path to your new resume file (decoded from base64)
 resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
+if not os.path.exists(resume_path):
+    raise FileNotFoundError(f"Resume file not found at path: {resume_path}")
 
 # Find and upload resume
-upload_button = driver.find_element(By.XPATH, "//input[@id='attachCV']")
-upload_button.send_keys(resume_path)
-
-# Wait for upload to complete
-time.sleep(5)
-
-print("Resume uploaded successfully!")
+try:
+    upload_button = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.XPATH, "//input[@id='attachCV']"))
+    )
+    upload_button.send_keys(resume_path)
+    print("Resume uploaded successfully!")
+except Exception as e:
+    print(f"Error uploading resume: {e}")
+    print("Page source for debugging:")
+    print(driver.page_source)
 
 # Close the browser
 driver.quit()
