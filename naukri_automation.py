@@ -61,11 +61,21 @@ except Exception as e:
 
 # Verify login success
 try:
-    WebDriverWait(driver, 30).until(EC.url_contains("dashboard"))
+    WebDriverWait(driver, 60).until(EC.url_contains("dashboard"))
     print("Logged in successfully! Current URL:", driver.current_url)
 except Exception as e:
     print(f"Error verifying login: {e}")
     print("Current URL:", driver.current_url)
+
+    # Capture login error message
+    error_message = driver.find_elements(By.CLASS_NAME, "erLbl")
+    if error_message:
+        print("Login error message:", error_message[0].text)
+
+    # Print page source for debugging
+    print("Page source after login attempt:")
+    print(driver.page_source)
+
     driver.quit()
     raise
 
