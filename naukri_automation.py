@@ -81,7 +81,7 @@ if not os.path.exists(resume_path):
 
 # Find and upload resume
 try:
-    upload_button = WebDriverWait(driver, 20).until(
+    upload_button = WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']"))
     )
     driver.execute_script("arguments[0].scrollIntoView();", upload_button)
