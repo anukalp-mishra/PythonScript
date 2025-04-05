@@ -69,4 +69,4 @@ jobs:
     - name: Run Python Script
       run: |
         source naukri_env/bin/activate
-        python your_script.py
+        python naukri_automation.py
