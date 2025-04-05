@@ -78,4 +78,4 @@ jobs:
         python naukri_automation.py
         "
         # Cleanup temporary files
-        rm -rf /tmp/.X11-unix /tmp/.X*
+        sudo rm -rf /tmp/.X11-unix /tmp/.X*
