@@ -1,0 +1,51 @@
+name: Python Automation
+
+on:
+  workflow_dispatch: # Allows manual triggering of the workflow
+  schedule:
+    - cron: "*/5 * * * *" # Runs every 5 minutes
+
+jobs:
+  automate-naukri-task:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+
+    - name: Install dependencies in naukri_env
+      run: |
+        python -m venv naukri_env
+        source naukri_env/bin/activate
+        python -m pip install --upgrade pip
+        pip install selenium
+
+    - name: Download ChromeDriver
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        wget https://chromedriver.storage.googleapis.com/91.0.4472.101/chromedriver_linux64.zip
+        unzip chromedriver_linux64.zip
+        sudo mv chromedriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/chromedriver
+
+    - name: Install Google Chrome
+      run: |
+        sudo apt-get install -y software-properties-common
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+
+    - name: Run Naukri Automation Script in naukri_env
+      env:
+        NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
+        NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
+      run: |
+        source naukri_env/bin/activate
+        python /Users/anukalp/Documents/PythonScript/naukri_automation.py
