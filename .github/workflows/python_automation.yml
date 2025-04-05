@@ -48,4 +48,4 @@ jobs:
         NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
       run: |
         source naukri_env/bin/activate
-        python /Users/anukalp/Documents/PythonScript/naukri_automation.py
+        python naukri_automation.py
