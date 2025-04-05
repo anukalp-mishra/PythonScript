@@ -53,7 +53,7 @@ driver.get(profile_url)
 time.sleep(5)
 
 print("Navigated to Profile Page!")
-
+'''
 # Path to your new resume file (decoded from base64)
 resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
 
@@ -68,8 +68,7 @@ time.sleep(5)
 
 print("Resume uploaded successfully!")
 
-
-
+'''
 
 # Close the browser
 driver.quit()
