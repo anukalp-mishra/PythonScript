@@ -27,8 +27,8 @@ jobs:
 
     - name: Update and upgrade system packages
       run: |
-        sudo apt-get update --fix-missing || true
-        sudo apt-get dist-upgrade -y --allow-downgrades || true
+        sudo apt-get update --fix-missing || echo "Warning: apt-get update failed"
+        sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends || echo "Warning: apt-get dist-upgrade failed"
 
     - name: Download ChromeDriver
       run: |
