@@ -27,8 +27,8 @@ jobs:
 
     - name: Update and upgrade system packages
       run: |
-        sudo apt-get update
-        sudo apt-get dist-upgrade -y
+        sudo apt-get update --fix-missing || true
+        sudo apt-get dist-upgrade -y --allow-downgrades || true
 
     - name: Download ChromeDriver
       run: |
