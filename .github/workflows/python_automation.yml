@@ -25,10 +25,30 @@ jobs:
         python -m pip install --upgrade pip
         pip install selenium
 
+    - name: Clean and reconfigure package manager
+      run: |
+        sudo rm -rf /var/lib/apt/lists/*
+        sudo apt-get clean
+        for i in {1..3}; do
+          sudo apt-get update --fix-missing && break || echo "Retrying apt-get update ($i/3)"
+          sleep 5
+        done
+        sudo dpkg --configure -a || echo "Warning: dpkg reconfiguration failed"
+        for i in {1..3}; do
+          sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends && break || echo "Retrying apt-get dist-upgrade ($i/3)"
+          sleep 5
+        done
+
     - name: Update and upgrade system packages
       run: |
-        sudo apt-get update --fix-missing || echo "Warning: apt-get update failed"
-        sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends || echo "Warning: apt-get dist-upgrade failed"
+        for i in {1..3}; do
+          sudo apt-get update --fix-missing && break || echo "Retrying apt-get update ($i/3)"
+          sleep 5
+        done
+        for i in {1..3}; do
+          sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends && break || echo "Retrying apt-get dist-upgrade ($i/3)"
+          sleep 5
+        done
 
     - name: Download ChromeDriver
       run: |
