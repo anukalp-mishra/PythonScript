@@ -64,12 +64,16 @@ jobs:
         echo "ChromeDriver version:"
         chromedriver --version
 
-    - name: Run Python Script
-      env:
-        NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}  # Sensitive data
-        NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}  # Sensitive data
-        ENVIRONMENT: ${{ vars.ENVIRONMENT }}            # Non-sensitive data
+    - name: Install Virtual Display
       run: |
-        source naukri_env/bin/activate
-        echo "Environment: $ENVIRONMENT"
+        sudo apt-get install -y xvfb
+
+    - name: Run Python Script with Virtual Display
+      env:
+        NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
+        NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
+      run: |
+        xvfb-run --server-args="-screen 0 1920x1080x24" bash -c "
+        source naukri_env/bin/activate &&
         python naukri_automation.py
+        "
