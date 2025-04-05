@@ -25,13 +25,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install selenium
 
-    - name: Install Specific Google Chrome Version
+    - name: Install Latest Google Chrome Version
       run: |
         sudo apt-get install -y software-properties-common
         wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
         sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
         sudo apt-get update
-        sudo apt-get install -y google-chrome-stable=135.0.7049.42-1
+        sudo apt-get install -y google-chrome-stable
 
     - name: Download Latest ChromeDriver Version
       run: |
