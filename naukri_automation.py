@@ -46,68 +46,15 @@ except Exception as e:
     print("Element attributes for debugging:")
     element = driver.find_element(By.ID, "usernameField")
 
-# Verify login success
+# Enter password and click login
 try:
-    WebDriverWait(driver, 10).until(EC.url_contains("dashboard"))
-    print("Logged in successfully! Current URL:", driver.current_url)
-except Exception as e:
-    print(f"Error verifying login: {e}")
-    print("Current URL:", driver.current_url)
-    driver.quit()
-    raise
-
-# Navigate to the Profile Page
-profile_url = "https://www.naukri.com/mnjuser/profile"
-driver.get(profile_url)
-print("Navigated to Profile Page. Current URL:", driver.current_url)
-
-# Wait for the profile page to load
-try:
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']")))
-    print("Navigated to Profile Page!")
-except Exception as e:
-    print(f"Error navigating to Profile Page: {e}")
-    print("Page source for debugging:")
-    print(driver.page_source)
-
-# Check for iframes and switch if necessary
-iframes = driver.find_elements(By.TAG_NAME, "iframe")
-if iframes:
-    print(f"Found {len(iframes)} iframe(s). Attempting to switch...")
-    for index, iframe in enumerate(iframes):
-        try:
-            driver.switch_to.frame(iframe)
-            print(f"Switched to iframe {index}.")
-            if driver.find_elements(By.XPATH, "//*[@id='attachCV']"):
-                print("Element found inside iframe!")
-                break
-            driver.switch_to.default_content()
-        except Exception as iframe_error:
-            print(f"Error switching to iframe {index}: {iframe_error}")
-else:
-    print("No iframes found on the page.")
-
-# Path to your new resume file
-resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
-if not os.path.exists(resume_path):
-    raise FileNotFoundError(f"Resume file not found at path: {resume_path}")
-
-# Find and upload resume
-try:
-    upload_button = WebDriverWait(driver, 60).until(
-        EC.visibility_of_element_located((By.XPATH, "//*[@id='attachCV']"))
+    password_field = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.ID, "passwordField"))
     )
-    driver.execute_script("arguments[0].scrollIntoView();", upload_button)
-    upload_button.send_keys(resume_path)
-    print("Resume uploaded successfully!")
+    driver.execute_script("arguments[0].scrollIntoView();", password_field)  # Scroll to the element
+    password_field.send_keys(password)
+    print("Entered password successfully!")
 except Exception as e:
-    print(f"Error uploading resume: {e}")
-    print("Page source for debugging:")
-    print(driver.page_source)
-    print("All input elements on the page:")
-    inputs = driver.find_elements(By.TAG_NAME, "input")
-    for input_element in inputs:
-        print(input_element.get_attribute("outerHTML"))
-
-# Close the browser
-driver.quit()
+    print(f"Error interacting with password field: {e}")
+    print("Element attributes for debugging:")
+    element = driver.find_element(By.ID, "passwordField")
