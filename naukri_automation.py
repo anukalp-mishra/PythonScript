@@ -58,8 +58,23 @@ except Exception as e:
     print(f"Error navigating to Profile Page: {e}")
     print("Page source for debugging:")
     print(driver.page_source)
-    driver.quit()
-    raise
+
+# Check for iframes and switch if necessary
+iframes = driver.find_elements(By.TAG_NAME, "iframe")
+if iframes:
+    print(f"Found {len(iframes)} iframe(s). Attempting to switch...")
+    for index, iframe in enumerate(iframes):
+        try:
+            driver.switch_to.frame(iframe)
+            print(f"Switched to iframe {index}.")
+            if driver.find_elements(By.XPATH, "//*[@id='attachCV']"):
+                print("Element found inside iframe!")
+                break
+            driver.switch_to.default_content()
+        except Exception as iframe_error:
+            print(f"Error switching to iframe {index}: {iframe_error}")
+else:
+    print("No iframes found on the page.")
 
 # Path to your new resume file
 resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
@@ -68,10 +83,10 @@ if not os.path.exists(resume_path):
 
 # Find and upload resume
 try:
-    upload_button = WebDriverWait(driver, 20).until(
+    upload_button = WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']"))
     )
-    driver.execute_script("arguments[0].scrollIntoView();", upload_button)  # Scroll to the element
+    driver.execute_script("arguments[0].scrollIntoView();", upload_button)
     upload_button.send_keys(resume_path)
     print("Resume uploaded successfully!")
 except Exception as e:
