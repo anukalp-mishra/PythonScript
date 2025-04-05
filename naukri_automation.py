@@ -38,7 +38,7 @@ WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[
 
 # Verify login success
 try:
-    WebDriverWait(driver, 60).until(EC.url_contains("dashboard"))
+    WebDriverWait(driver, 90).until(EC.url_contains("mnjuser"))
     logger.info("Logged in successfully!")
 except Exception as e:
     logger.error(f"Error verifying login: {e}")
