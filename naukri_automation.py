@@ -7,14 +7,15 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
 
-# Set up Chrome options for headless mode
+# Set up Chrome options for debugging
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # Enable headless mode
+# Comment out headless mode for debugging
+# chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # Bypass bot detection
-chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")  # Custom User-Agent
+chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.7049.52 Safari/537.36")  # Custom User-Agent
 
 # Initialize WebDriver
 driver = webdriver.Chrome(options=chrome_options)
@@ -50,11 +51,27 @@ profile_url = "https://www.naukri.com/mnjuser/profile"
 driver.get(profile_url)
 
 # Wait for the profile page to load
-WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//input[@id='attachCV']")))
+try:
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']")))
+    print("Navigated to Profile Page!")
+except Exception as e:
+    print(f"Error navigating to Profile Page: {e}")
+    print("Page source for debugging:")
+    print(driver.page_source)
+    driver.quit()
+    raise
 
-print("Navigated to Profile Page!")
+# Check if the element is inside an iframe
+try:
+    iframe = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, "//iframe[@id='iframe_id']"))  # Replace with actual iframe XPath
+    )
+    driver.switch_to.frame(iframe)
+    print("Switched to iframe.")
+except Exception as e:
+    print("No iframe detected or failed to switch:", e)
 
-# Path to your new resume file (decoded from base64)
+# Path to your new resume file
 resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
 if not os.path.exists(resume_path):
     raise FileNotFoundError(f"Resume file not found at path: {resume_path}")
@@ -62,8 +79,9 @@ if not os.path.exists(resume_path):
 # Find and upload resume
 try:
     upload_button = WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.XPATH, "//input[@id='attachCV']"))
+        EC.visibility_of_element_located((By.XPATH, "//*[@id='attachCV']"))
     )
+    driver.execute_script("arguments[0].scrollIntoView();", upload_button)
     upload_button.send_keys(resume_path)
     print("Resume uploaded successfully!")
 except Exception as e:
