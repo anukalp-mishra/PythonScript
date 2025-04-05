@@ -9,8 +9,7 @@ import os
 
 # Set up Chrome options for debugging
 chrome_options = Options()
-# Comment out headless mode for debugging
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")  # Enable headless mode
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
@@ -42,8 +41,7 @@ driver.find_element(By.ID, "passwordField").send_keys(password)
 driver.find_element(By.XPATH, "//button[contains(text(), 'Login')]").click()
 
 # Allow time for login
-time.sleep(5)
-
+WebDriverWait(driver, 10).until(EC.url_contains("dashboard"))
 print("Logged in successfully!")
 
 # Navigate to the Profile Page
@@ -58,18 +56,23 @@ except Exception as e:
     print(f"Error navigating to Profile Page: {e}")
     print("Page source for debugging:")
     print(driver.page_source)
-    driver.quit()
-    raise
 
-# Check if the element is inside an iframe
-try:
-    iframe = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "//iframe[@id='iframe_id']"))  # Replace with actual iframe XPath
-    )
-    driver.switch_to.frame(iframe)
-    print("Switched to iframe.")
-except Exception as e:
-    print("No iframe detected or failed to switch:", e)
+# Check for iframes and switch if necessary
+iframes = driver.find_elements(By.TAG_NAME, "iframe")
+if iframes:
+    print(f"Found {len(iframes)} iframe(s). Attempting to switch...")
+    for index, iframe in enumerate(iframes):
+        try:
+            driver.switch_to.frame(iframe)
+            print(f"Switched to iframe {index}.")
+            if driver.find_elements(By.XPATH, "//*[@id='attachCV']"):
+                print("Element found inside iframe!")
+                break
+            driver.switch_to.default_content()
+        except Exception as iframe_error:
+            print(f"Error switching to iframe {index}: {iframe_error}")
+else:
+    print("No iframes found on the page.")
 
 # Path to your new resume file
 resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
@@ -79,7 +82,7 @@ if not os.path.exists(resume_path):
 # Find and upload resume
 try:
     upload_button = WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located((By.XPATH, "//*[@id='attachCV']"))
+        EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']"))
     )
     driver.execute_script("arguments[0].scrollIntoView();", upload_button)
     upload_button.send_keys(resume_path)
