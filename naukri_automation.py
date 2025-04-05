@@ -58,3 +58,50 @@ except Exception as e:
     print(f"Error interacting with password field: {e}")
     print("Element attributes for debugging:")
     element = driver.find_element(By.ID, "passwordField")
+
+# Verify login success
+try:
+    WebDriverWait(driver, 30).until(EC.url_contains("dashboard"))
+    print("Logged in successfully! Current URL:", driver.current_url)
+except Exception as e:
+    print(f"Error verifying login: {e}")
+    print("Current URL:", driver.current_url)
+    driver.quit()
+    raise
+
+# Navigate to the Profile Page
+profile_url = "https://www.naukri.com/mnjuser/profile"
+driver.get(profile_url)
+print("Navigated to Profile Page. Current URL:", driver.current_url)
+
+# Wait for the profile page to load
+try:
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']")))
+    print("Navigated to Profile Page!")
+except Exception as e:
+    print(f"Error navigating to Profile Page: {e}")
+    print("Page source for debugging:")
+    print(driver.page_source)
+    driver.quit()
+    raise
+
+# Path to your new resume file
+resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
+if not os.path.exists(resume_path):
+    raise FileNotFoundError(f"Resume file not found at path: {resume_path}")
+
+# Find and upload resume
+try:
+    upload_button = WebDriverWait(driver, 60).until(
+        EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']"))
+    )
+    driver.execute_script("arguments[0].scrollIntoView();", upload_button)
+    upload_button.send_keys(resume_path)
+    print("Resume uploaded successfully!")
+except Exception as e:
+    print(f"Error uploading resume: {e}")
+    print("Page source for debugging:")
+    print(driver.page_source)
+
+# Close the browser
+driver.quit()
