@@ -37,8 +37,24 @@ WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "passwordFiel
 WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Login')]"))).click()
 
 # Verify login success
-WebDriverWait(driver, 30).until(EC.url_contains("dashboard"))
-logger.info("Logged in successfully!")
+try:
+    WebDriverWait(driver, 60).until(EC.url_contains("dashboard"))
+    logger.info("Logged in successfully!")
+except Exception as e:
+    logger.error(f"Error verifying login: {e}")
+    logger.info("Current URL after login attempt: %s", driver.current_url)
+
+    # Capture login error message
+    error_message = driver.find_elements(By.CLASS_NAME, "erLbl")
+    if error_message:
+        logger.error("Login error message: %s", error_message[0].text)
+
+    # Print page source for debugging
+    logger.info("Page source after login attempt:")
+    logger.info(driver.page_source)
+
+    driver.quit()
+    raise
 
 # Close the browser
 driver.quit()
