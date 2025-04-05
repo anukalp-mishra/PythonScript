@@ -65,6 +65,11 @@ jobs:
         chromedriver --version
 
     - name: Run Python Script
+      env:
+        NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}  # Sensitive data
+        NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}  # Sensitive data
+        ENVIRONMENT: ${{ vars.ENVIRONMENT }}            # Non-sensitive data
       run: |
         source naukri_env/bin/activate
+        echo "Environment: $ENVIRONMENT"
         python naukri_automation.py
