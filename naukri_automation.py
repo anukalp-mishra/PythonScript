@@ -33,64 +33,15 @@ password = os.getenv("NAUKRI_PASSWORD")
 if not username or not password:
     raise ValueError("Naukri credentials are not set in environment variables.")
 
-# Find username & password fields and enter values
-driver.find_element(By.ID, "usernameField").send_keys(username)
-driver.find_element(By.ID, "passwordField").send_keys(password)
-
-# Click login button
-driver.find_element(By.XPATH, "//button[contains(text(), 'Login')]").click()
-
-# Allow time for login
-WebDriverWait(driver, 10).until(EC.url_contains("dashboard"))
-print("Logged in successfully!")
-
-# Navigate to the Profile Page
-profile_url = "https://www.naukri.com/mnjuser/profile"
-driver.get(profile_url)
-
-# Wait for the profile page to load
+# Wait for the username field to be clickable
 try:
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']")))
-    print("Navigated to Profile Page!")
-except Exception as e:
-    print(f"Error navigating to Profile Page: {e}")
-    print("Page source for debugging:")
-    print(driver.page_source)
-
-# Check for iframes and switch if necessary
-iframes = driver.find_elements(By.TAG_NAME, "iframe")
-if iframes:
-    print(f"Found {len(iframes)} iframe(s). Attempting to switch...")
-    for index, iframe in enumerate(iframes):
-        try:
-            driver.switch_to.frame(iframe)
-            print(f"Switched to iframe {index}.")
-            if driver.find_elements(By.XPATH, "//*[@id='attachCV']"):
-                print("Element found inside iframe!")
-                break
-            driver.switch_to.default_content()
-        except Exception as iframe_error:
-            print(f"Error switching to iframe {index}: {iframe_error}")
-else:
-    print("No iframes found on the page.")
-
-# Path to your new resume file
-resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
-if not os.path.exists(resume_path):
-    raise FileNotFoundError(f"Resume file not found at path: {resume_path}")
-
-# Find and upload resume
-try:
-    upload_button = WebDriverWait(driver, 60).until(
-        EC.presence_of_element_located((By.XPATH, "//*[@id='attachCV']"))
+    username_field = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.ID, "usernameField"))
     )
-    driver.execute_script("arguments[0].scrollIntoView();", upload_button)
-    upload_button.send_keys(resume_path)
-    print("Resume uploaded successfully!")
+    driver.execute_script("arguments[0].scrollIntoView();", username_field)  # Scroll to the element
+    username_field.send_keys(username)
+    print("Entered username successfully!")
 except Exception as e:
-    print(f"Error uploading resume: {e}")
-    print("Page source for debugging:")
-    print(driver.page_source)
-
-# Close the browser
-driver.quit()
+    print(f"Error interacting with username field: {e}")
+    print("Element attributes for debugging:")
+    element = driver.find_element(By.ID, "usernameField")
