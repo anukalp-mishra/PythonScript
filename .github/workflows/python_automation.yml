@@ -31,11 +31,18 @@ jobs:
         wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
         sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
         sudo apt-get update
-        sudo apt-get install -y google-chrome-stable=134.0.6998.166-1
+        sudo apt-get install -y google-chrome-stable=135.0.7049.42-1
 
-    - name: Download Specific ChromeDriver Version
+    - name: Download Latest ChromeDriver Version
       run: |
-        wget "https://chromedriver.storage.googleapis.com/134.0.6998.165/chromedriver_linux64.zip"
+        echo "Fetching the latest available ChromeDriver version..."
+        DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE")
+        if [ -z "$DRIVER_VERSION" ]; then
+            echo "Failed to fetch the latest ChromeDriver version."
+            exit 1
+        fi
+        echo "Latest ChromeDriver version: $DRIVER_VERSION"
+        wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
         unzip chromedriver_linux64.zip
         sudo mv chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/chromedriver
