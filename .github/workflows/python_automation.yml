@@ -48,6 +48,12 @@ jobs:
     - name: Update and upgrade system packages
       run: |
         for i in {1..3}; do
+          sudo apt-get update --fix-missing && break || echo "Retrying apt-get update ($i/3)"
+          sleep 5
+        done
+        for i in {1..3}; do
+          sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends && break || echo "Retrying apt-get dist-upgrade ($i/3)"
+          sleep 5
         done
 
     - name: Download ChromeDriver
