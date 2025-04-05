@@ -70,7 +70,7 @@ jobs:
         google-chrome --version
         CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
         echo "Detected Chrome version: $CHROME_VERSION"
-        DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}" || echo "Failed to fetch ChromeDriver version")
+        DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
         if [ -z "$DRIVER_VERSION" ]; then
             echo "Failed to detect ChromeDriver version for Chrome version $CHROME_VERSION"
             exit 1
