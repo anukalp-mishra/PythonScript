@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import os
 
 # Set up Chrome options for headless mode
 chrome_options = Options()
@@ -24,9 +25,13 @@ driver.get("https://www.naukri.com/nlogin/login")
 # Wait for the page to load
 WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "usernameField")))
 
-# Enter credentials (Replace with your details)
-username = "anukalp.info@gmail.com"
-password = "Loveami2k22@"
+# Fetch credentials from environment variables
+username = os.getenv("NAUKRI_USERNAME")
+password = os.getenv("NAUKRI_PASSWORD")
+
+# Ensure credentials are provided
+if not username or not password:
+    raise ValueError("Naukri credentials are not set in environment variables.")
 
 # Find username & password fields and enter values
 driver.find_element(By.ID, "usernameField").send_keys(username)
@@ -49,10 +54,8 @@ time.sleep(5)
 
 print("Navigated to Profile Page!")
 
-import os
-
-# Path to your new resume file (Change this to your actual resume path)
-resume_path = "/Users/anukalp/Documents/MyData/Anukalp-Resume.pdf"
+# Path to your new resume file (decoded from base64)
+resume_path = os.path.join(os.getcwd(), "Anukalp-Resume.pdf")
 
 # Find and upload resume
 upload_button = driver.find_element(By.XPATH, "//input[@id='attachCV']")

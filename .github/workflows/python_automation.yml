@@ -25,74 +25,41 @@ jobs:
         python -m pip install --upgrade pip
         pip install selenium
 
-    - name: Clean and reconfigure package manager
-      run: |
-        sudo rm -rf /var/lib/apt/lists/*
-        sudo apt-get clean || true
-        sudo dpkg --configure -a || echo "Warning: dpkg reconfiguration failed with exit code $?" || true
-        for i in {1..3}; do
-          sudo apt-get update --fix-missing || echo "Warning: apt-get update failed with exit code $?" || true
-          sleep 5
-        done
-
-    - name: Debug apt state
-      run: |
-        echo "Printing apt logs for debugging..."
-        cat /var/log/apt/history.log || echo "No apt history log found"
-        cat /var/log/apt/term.log || echo "No apt term log found"
-
-    - name: Update and upgrade system packages
-      run: |
-        for i in {1..3}; do
-          sudo apt-get update --fix-missing || echo "Warning: apt-get update failed with exit code $?" || true
-          sleep 5
-        done
-        sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends || echo "Warning: apt-get dist-upgrade failed with exit code $?" || true
-
-    - name: Install Google Chrome
+    - name: Install Specific Google Chrome Version
       run: |
         sudo apt-get install -y software-properties-common
         wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
         sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
         sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
+        sudo apt-get install -y google-chrome-stable=134.0.6998.166-1
 
-    - name: Download ChromeDriver
+    - name: Download Specific ChromeDriver Version
       run: |
-        sudo apt-get update
-        sudo apt-get install -y wget unzip
-        if ! command -v google-chrome &> /dev/null
-        then
-            echo "Google Chrome could not be found"
-            exit 1
-        fi
-        echo "Google Chrome version:"
-        google-chrome --version
-        CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
-        echo "Detected Chrome version: $CHROME_VERSION"
-        DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
-        if [ -z "$DRIVER_VERSION" ]; then
-            echo "Failed to detect ChromeDriver version for Chrome version $CHROME_VERSION. Attempting alternate method..."
-            DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE")
-            if [ -z "$DRIVER_VERSION" ]; then
-                echo "Failed to detect ChromeDriver version using alternate method."
-                exit 1
-            fi
-        fi
-        echo "Detected ChromeDriver version: $DRIVER_VERSION"
-        wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
-        if [ $? -ne 0 ]; then
-            echo "Failed to download ChromeDriver"
-            exit 1
-        fi
+        wget "https://chromedriver.storage.googleapis.com/134.0.6998.165/chromedriver_linux64.zip"
         unzip chromedriver_linux64.zip
         sudo mv chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/chromedriver
 
-    - name: Run Naukri Automation Script in naukri_env
-      env:
-        NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
-        NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
+    - name: Verify Chrome and ChromeDriver Versions
+      run: |
+        echo "Verifying installed versions..."
+        if ! command -v google-chrome &> /dev/null
+        then
+            echo "Google Chrome is not installed or not in PATH"
+            exit 1
+        fi
+        echo "Google Chrome version:"
+        google-chrome --version
+
+        if ! command -v chromedriver &> /dev/null
+        then
+            echo "ChromeDriver is not installed or not in PATH"
+            exit 1
+        fi
+        echo "ChromeDriver version:"
+        chromedriver --version
+
+    - name: Run Python Script
       run: |
         source naukri_env/bin/activate
-        python naukri_automation.py
+        python your_script.py
