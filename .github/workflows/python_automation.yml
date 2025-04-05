@@ -29,13 +29,9 @@ jobs:
       run: |
         sudo rm -rf /var/lib/apt/lists/*
         sudo apt-get clean || true
-        for i in {1..3}; do
-          sudo apt-get update --fix-missing || echo "Warning: apt-get update failed with exit code $?" || true
-          sleep 5
-        done
         sudo dpkg --configure -a || echo "Warning: dpkg reconfiguration failed with exit code $?" || true
         for i in {1..3}; do
-          sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends || echo "Warning: apt-get dist-upgrade failed with exit code $?" || true
+          sudo apt-get update --fix-missing || echo "Warning: apt-get update failed with exit code $?" || true
           sleep 5
         done
 
@@ -51,21 +47,7 @@ jobs:
           sudo apt-get update --fix-missing || echo "Warning: apt-get update failed with exit code $?" || true
           sleep 5
         done
-        for i in {1..3}; do
-          sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends || echo "Warning: apt-get dist-upgrade failed with exit code $?" || true
-          sleep 5
-        done
-
-    - name: Download ChromeDriver
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget unzip
-        CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
-        DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
-        wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
-        unzip chromedriver_linux64.zip
-        sudo mv chromedriver /usr/local/bin/
-        sudo chmod +x /usr/local/bin/chromedriver
+        sudo apt-get dist-upgrade -y --allow-downgrades --no-install-recommends || echo "Warning: apt-get dist-upgrade failed with exit code $?" || true
 
     - name: Install Google Chrome
       run: |
@@ -74,6 +56,22 @@ jobs:
         sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
         sudo apt-get update
         sudo apt-get install -y google-chrome-stable
+
+    - name: Download ChromeDriver
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        if ! command -v google-chrome &> /dev/null
+        then
+            echo "Google Chrome could not be found"
+            exit 1
+        fi
+        CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
+        DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
+        wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+        unzip chromedriver_linux64.zip
+        sudo mv chromedriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/chromedriver
 
     - name: Run Naukri Automation Script in naukri_env
       env:
